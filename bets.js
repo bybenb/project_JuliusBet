@@ -130,7 +130,7 @@ export function renderProfile(containerId) {
   header.innerHTML = `
     <h2>Perfil de ${usuario}</h2>
     <p>Saldo: <strong style="color:var(--cor-verde)">${saldo.toFixed(2)}</strong></p>
-    <div style="margin:8px 0"><button id="deposit-demo" class="btn signin-btn">Receber R$100 demo</button></div>
+    <div style="margin:8px 0"><button id="deposit-demo" class="btn signin-btn">Receber 100KZ demo</button></div>
   `;
   container.appendChild(header);
 
@@ -147,7 +147,7 @@ export function renderProfile(containerId) {
       const date = new Date(b.time);
       const ret = (b.stake * b.odd).toFixed(2);
       li.style.padding = '8px 0';
-      li.innerHTML = `<strong>${b.teams}</strong> — Aposta: R$${b.stake} @ ${b.odd} → Potencial R$${ret} <br/><small style="color:#999">${date.toLocaleString()}</small>`;
+      li.innerHTML = `<strong>${b.teams}</strong> — Apostaste: ${b.stake}Kz; Pontos ${b.odd} → Ganhas ${ret}Kz <br/><small style="color:#999">${date.toLocaleString()}</small>`;
       ul.appendChild(li);
     });
     list.appendChild(ul);
@@ -157,8 +157,71 @@ export function renderProfile(containerId) {
   document.getElementById('deposit-demo')?.addEventListener('click', () => {
     const novo = +(saldo + 100).toFixed(2);
     setSaldo(usuario, novo);
-    showMessage('R$100 adicionados (demo).', 'success');
+    showMessage('100KZ adicionados (demo).', 'success');
     renderProfile(containerId);
     updateUserInfo();
+  });
+}
+
+export function renderPromocoes(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  const promos = [
+    { titulo: 'Bônus de Boas-vindas', descricao: 'Receba 100% de bônus no seu primeiro depósito até 200Kz.', codigo: 'BEMVINDO' },
+    { titulo: 'Cashback 10%', descricao: 'Recupere 10% das perdas em apostas ao vivo toda semana.', codigo: 'CASHBACK10' },
+    { titulo: 'Aposta Grátis', descricao: 'Ganhe uma aposta grátis de 50Kz ao se registrar.', codigo: 'FREE50' },
+    { titulo: 'Odds Turbinadas', descricao: 'Odds até 50% maiores em partidas selecionadas.', codigo: 'TURBO' },
+    { titulo: 'Acumulador Premiado', descricao: 'Bônus adicional em apostas acumuladas com 3+ seleções.', codigo: 'ACCUM3' }
+  ];
+  
+  container.innerHTML = '';
+  promos.forEach(promo => {
+    const card = document.createElement('div');
+    card.style.cssText = 'background:rgba(10,255,130,0.1); border:1px solid #0aff82; border-radius:8px; padding:16px; color:#fff;';
+    card.innerHTML = `
+      <h3 style="margin:0 0 8px 0; color:var(--cor-verde);">${promo.titulo}</h3>
+      <p style="margin:0 0 12px 0; color:#ccc; font-size:14px;">${promo.descricao}</p>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <code style="background:#0f1116; padding:6px 10px; border-radius:4px; font-size:12px; color:#0aff82;">${promo.codigo}</code>
+        <button class="btn signin-btn" style="font-size:12px; padding:6px 12px;">Ver Detalhes</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+export function renderEstatisticas(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  const stats = [
+    { categoria: 'Futebol', taxa: '54%', descricao: 'Taxa de acerto nas últimas 100 apostas de futebol.' },
+    { categoria: 'Basquetebol', taxa: '62%', descricao: 'Desempenho em apostas de basquetebol profissional.' },
+    { categoria: 'Esports', taxa: '48%', descricao: 'Estatísticas de apostas em competições de Esports.' },
+    { categoria: 'Tênis', taxa: '58%', descricao: 'Taxa média de apostas em torneios de tênis.' },
+    { categoria: 'Cassino', taxa: '50%', descricao: 'Probabilidades equilibradas em jogos de cassino.' }
+  ];
+  
+  container.innerHTML = '';
+  
+  stats.forEach(stat => {
+    const card = document.createElement('div');
+    card.style.cssText = 'margin-bottom:16px; background:rgba(15,17,22,0.6); border:1px solid #222; border-radius:8px; padding:16px; color:#fff;';
+    
+    const taxa = parseFloat(stat.taxa);
+    const barColor = taxa >= 55 ? '#0aff82' : taxa >= 50 ? '#ffa500' : '#ff4444';
+    
+    card.innerHTML = `
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+        <h3 style="margin:0; font-size:16px;">${stat.categoria}</h3>
+        <span style="color:${barColor}; font-weight:bold; font-size:16px;">${stat.taxa}</span>
+      </div>
+      <div style="background:#0f1116; border-radius:4px; height:8px; overflow:hidden; margin-bottom:8px;">
+        <div style="background:${barColor}; height:100%; width:${taxa}%; transition:all 0.3s ease;"></div>
+      </div>
+      <p style="margin:0; color:#ccc; font-size:13px;">${stat.descricao}</p>
+    `;
+    container.appendChild(card);
   });
 }
