@@ -3,45 +3,55 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Conta ‚Äî JuliusBet</title>
+    <title>Conta ó JuliusBet</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <header class="header">
       <div class="logo">Julius<span>Bet</span></div>
       <nav class="nav">
-        <a href="index.html">In√≠cio</a>
+        <a href="index.html">InÌcio</a>
         <a href="ao-vivo.html">Ao Vivo</a>
         <a href="cassino.html">Cassino</a>
-        <a href="promocoes.html">Promo√ß√µes</a>
-        <a href="estatisticas.html">Estat√≠sticas</a>
-        <a href="conta.html">Conta</a>
         <a href="contact.html">Contato</a>
       </nav>
       <div class="auth">
-        <button class="btn login-btn">Entrar</button>
-        <button class="btn signin-btn">Registrar</button>
+        <a href="#login" class="btn login-btn">Entrar</a>
+        <a href="#register" class="btn signin-btn">Registrar</a>
       </div>
     </header>
 
     <main class="matches-section">
       <h1>Minha Conta</h1>
-      <p>√Årea de login / registro e detalhes da conta ‚Äî demo.</p>
+      <p>¡rea de login / registro e detalhes da conta ó demo.</p>
 
-      <div style="max-width:420px;">
-        <label for="u">Usu√°rio</label><br />
-        <input id="u" type="text" style="width:100%; padding:8px; margin:6px 0; border-radius:6px; border:1px solid #222; background:#0f1116; color:#fff;" />
+      <form id="login" data-form="login" style="max-width:420px; margin-bottom:24px;">
+        <h2>Entrar</h2>
+        <label for="u">Usu·rio</label><br />
+        <input id="u" name="usuario" type="text" style="width:100%; padding:8px; margin:6px 0; border-radius:6px; border:1px solid #222; background:#0f1116; color:#fff;" required />
 
         <label for="p">Senha</label><br />
-        <input id="p" type="password" style="width:100%; padding:8px; margin:6px 0; border-radius:6px; border:1px solid #222; background:#0f1116; color:#fff;" />
+        <input id="p" name="senha" type="password" style="width:100%; padding:8px; margin:6px 0; border-radius:6px; border:1px solid #222; background:#0f1116; color:#fff;" required />
 
-        <button class="btn banner-btn" style="margin-top:8px;">Entrar</button>
-      </div>
+        <button class="btn banner-btn" type="submit" style="margin-top:8px;">Entrar</button>
+      </form>
+
+      <form id="register" data-form="register" style="max-width:420px;">
+        <h2>Registrar</h2>
+        <label for="rn">Nome</label><br />
+        <input id="rn" name="nome" type="text" style="width:100%; padding:8px; margin:6px 0; border-radius:6px; border:1px solid #222; background:#0f1116; color:#fff;" required />
+        <label for="re">Email</label><br />
+        <input id="re" name="email" type="email" style="width:100%; padding:8px; margin:6px 0; border-radius:6px; border:1px solid #222; background:#0f1116; color:#fff;" required />
+        <label for="rp">Senha</label><br />
+        <input id="rp" name="senha" type="password" style="width:100%; padding:8px; margin:6px 0; border-radius:6px; border:1px solid #222; background:#0f1116; color:#fff;" required />
+
+        <button class="btn banner-btn" type="submit" style="margin-top:8px;">Criar Conta</button>
+      </form>
     </main>
 
     <div class="dono">by benb / <a href="http://www.instagram.com/bkapa8" target="_blank">ProgGennin</a></div>
 
-    <footer class="footer">JuliusBet ¬© 2025</footer>
+    <footer class="footer">JuliusBet © 2025</footer>
 
     <script src="script.js"></script>
   </body>

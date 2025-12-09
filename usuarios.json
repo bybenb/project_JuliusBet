@@ -1,0 +1,20 @@
+{
+  "usuarios": [
+    {
+      "usuario": "beny",
+      "senha": "beny2025"
+    },
+    {
+      "usuario": "aldo",
+      "senha": "aldo2025"
+    },
+    {
+      "usuario": "nazare2025",
+      "senha": "nazare2025"
+    },
+    {
+      "usuario": "etelvina",
+      "senha": "etelvina123"
+    }
+  ]
+}
