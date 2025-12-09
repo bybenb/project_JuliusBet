@@ -111,3 +111,54 @@ export function renderMatches(containerId) {
     card.querySelectorAll('.odd-btn').forEach(btn => { btn.addEventListener('click', () => { const odd = parseFloat(btn.dataset.odd); placeBet(match.teams, odd); }); });
   });
 }
+
+export function renderProfile(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const usuario = getUsuarioLogado();
+  if (!usuario) {
+    container.innerHTML = '<p>Área de perfil. Por favor, <a href="conta.html#login">faça login</a>.</p>';
+    return;
+  }
+
+  const saldo = getSaldo(usuario) ?? 0;
+  const bets = JSON.parse(localStorage.getItem('bets_' + usuario) || '[]');
+
+  container.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.innerHTML = `
+    <h2>Perfil de ${usuario}</h2>
+    <p>Saldo: <strong style="color:var(--cor-verde)">${saldo.toFixed(2)}</strong></p>
+    <div style="margin:8px 0"><button id="deposit-demo" class="btn signin-btn">Receber R$100 demo</button></div>
+  `;
+  container.appendChild(header);
+
+  const list = document.createElement('div');
+  list.innerHTML = `<h3>Minhas Apostas (${bets.length})</h3>`;
+  if (bets.length === 0) {
+    list.innerHTML += '<p>Nenhuma aposta registrada ainda.</p>';
+  } else {
+    const ul = document.createElement('ul');
+    ul.style.listStyle = 'none';
+    ul.style.padding = '0';
+    bets.slice().reverse().forEach(b => {
+      const li = document.createElement('li');
+      const date = new Date(b.time);
+      const ret = (b.stake * b.odd).toFixed(2);
+      li.style.padding = '8px 0';
+      li.innerHTML = `<strong>${b.teams}</strong> — Aposta: R$${b.stake} @ ${b.odd} → Potencial R$${ret} <br/><small style="color:#999">${date.toLocaleString()}</small>`;
+      ul.appendChild(li);
+    });
+    list.appendChild(ul);
+  }
+  container.appendChild(list);
+
+  document.getElementById('deposit-demo')?.addEventListener('click', () => {
+    const novo = +(saldo + 100).toFixed(2);
+    setSaldo(usuario, novo);
+    showMessage('R$100 adicionados (demo).', 'success');
+    renderProfile(containerId);
+    updateUserInfo();
+  });
+}
