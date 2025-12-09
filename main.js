@@ -1,5 +1,5 @@
 import { autenticar, getUsuarioLogado, setUsuarioLogado, registerUser, logout } from './auth.js';
-import { renderMatches, updateUserInfo, showMessage, renderProfile, renderPromocoes, renderEstatisticas } from './bets.js';
+import { renderMatches, updateUserInfo, showMessage, renderProfile, renderPromocoes, renderEstatisticas, simulateBetResult, resolveAllPendingBets } from './bets.js';
 import { getSaldo, setSaldo } from './bets.js';
 
 // Renderizar partidas em containers conhecidos

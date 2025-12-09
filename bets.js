@@ -70,7 +70,7 @@ export function placeBet(teams, odd) {
     setSaldo(usuario, saldo);
     const key = 'bets_' + usuario;
     const bets = JSON.parse(localStorage.getItem(key) || '[]');
-    bets.push({ teams, odd, stake, time: Date.now() });
+    bets.push({ teams, odd, stake, time: Date.now(), status: 'pending', result: null, winnings: 0 });
     localStorage.setItem(key, JSON.stringify(bets));
     updateUserInfo();
     showMessage(`Aposta de ${stake} registrada. Novo saldo: ${saldo}`, 'success');
@@ -110,6 +110,65 @@ export function renderMatches(containerId) {
     container.appendChild(card);
     card.querySelectorAll('.odd-btn').forEach(btn => { btn.addEventListener('click', () => { const odd = parseFloat(btn.dataset.odd); placeBet(match.teams, odd); }); });
   });
+}
+
+export function simulateBetResult(usuario, betIndex) {
+  const key = 'bets_' + usuario;
+  const bets = JSON.parse(localStorage.getItem(key) || '[]');
+  
+  if (!bets[betIndex] || bets[betIndex].status !== 'pending') return false;
+  
+  const bet = bets[betIndex];
+  const won = Math.random() > 0.5; // 50% chance de ganho
+  const winnings = won ? +(bet.stake * bet.odd).toFixed(0) : 0;
+  
+  bets[betIndex].status = won ? 'won' : 'lost';
+  bets[betIndex].result = won ? 'WIN' : 'LOSS';
+  bets[betIndex].winnings = winnings;
+  bets[betIndex].resolvedAt = Date.now();
+  
+  // Atualizar saldo se ganhou
+  if (won) {
+    const saldo = getSaldo(usuario) || 0;
+    const novoSaldo = +(saldo + winnings).toFixed(2);
+    setSaldo(usuario, novoSaldo);
+  }
+  
+  localStorage.setItem(key, JSON.stringify(bets));
+  return true;
+}
+
+export function resolveAllPendingBets(usuario) {
+  const key = 'bets_' + usuario;
+  const bets = JSON.parse(localStorage.getItem(key) || '[]');
+  
+  const pendingBets = bets.filter(b => b.status === 'pending');
+  let resolved = 0;
+  let totalWinnings = 0;
+  
+  pendingBets.forEach((_, idx) => {
+    const betIdx = bets.findIndex(b => b === _);
+    if (simulateBetResult(usuario, betIdx)) {
+      resolved++;
+      if (bets[betIdx].status === 'won') {
+        totalWinnings += bets[betIdx].winnings;
+      }
+    }
+  });
+  
+  return { resolved, totalWinnings };
+}
+
+export function getBetStatusColor(status) {
+  if (status === 'won') return '#0aff82';
+  if (status === 'lost') return '#ff4444';
+  return '#ffa500';
+}
+
+export function getBetStatusIcon(status) {
+  if (status === 'won') return '✅';
+  if (status === 'lost') return '❌';
+  return '⏳';
 }
 
 export function renderProfile(containerId) {
@@ -226,7 +285,12 @@ export function renderProfile(containerId) {
   // Lista de apostas
   const listSection = document.createElement('div');
   listSection.style.cssText = 'background:rgba(15,17,22,0.6); border:1px solid #222; border-radius:8px; padding:16px;';
-  listSection.innerHTML = `<h3 style="margin:0 0 16px 0;">📋 Histórico de Apostas (${bets.length})</h3>`;
+  
+  const pendingCount = bets.filter(b => b.status === 'pending').length;
+  listSection.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <h3 style="margin:0;">📋 Histórico de Apostas (${bets.length})</h3>
+    ${pendingCount > 0 ? `<button id="resolve-all-bets" class="btn signin-btn" style="padding:6px 12px; font-size:12px;">🎰 Resolver ${pendingCount} Apostas</button>` : ''}
+  </div>`;
   
   if (bets.length === 0) {
     listSection.innerHTML += '<p style="color:#aaa;">Nenhuma aposta registrada ainda. Comece a apostar! 🎯</p>';
@@ -234,21 +298,28 @@ export function renderProfile(containerId) {
     const ul = document.createElement('ul');
     ul.style.cssText = 'list-style:none; padding:0; margin:0;';
     
-    bets.slice().reverse().forEach((b, idx) => {
+    bets.slice().reverse().forEach((b, originalIdx) => {
       const li = document.createElement('li');
       const date = new Date(b.time);
       const ret = (b.stake * b.odd).toFixed(0);
-      li.style.cssText = 'padding:12px 0; border-bottom:1px solid #333; color:#fff;';
+      const statusColor = getBetStatusColor(b.status);
+      const statusIcon = getBetStatusIcon(b.status);
+      const resolvedText = b.status !== 'pending' ? `Resultado: <strong style="color:${statusColor};">${statusIcon} ${b.result}</strong> — Ganho: <strong style="color:${statusColor};">${b.winnings}Kz</strong>` : `<button class="resolve-btn" data-idx="${originalIdx}" style="background:${statusColor}; color:#000; border:none; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:11px; font-weight:bold;">🎲 Resolver</button>`;
+      
+      li.style.cssText = 'padding:12px; margin-bottom:8px; border-left:4px solid ' + statusColor + '; background:rgba(255,255,255,0.02); border-radius:4px; color:#fff;';
       li.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <strong style="color:var(--cor-verde);">#${idx + 1} ${b.teams}</strong>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <strong style="color:var(--cor-verde);">${b.teams}</strong>
           <span style="color:#ffa500; font-weight:bold;">@${b.odd}</span>
         </div>
-        <div style="display:flex; justify-content:space-between; font-size:12px; color:#aaa;">
-          <span>Apostaste: <strong style="color:#fff;">${b.stake}Kz</strong></span>
-          <span>Retorno: <strong style="color:#0aff82;">${ret}Kz</strong></span>
+        <div style="display:flex; justify-content:space-between; font-size:12px; color:#aaa; margin-bottom:8px;">
+          <span>Aposta: <strong style="color:#fff;">${b.stake}Kz</strong></span>
+          <span>Retorno potencial: <strong style="color:#0aff82;">${ret}Kz</strong></span>
         </div>
-        <small style="color:#666;">${date.toLocaleString()}</small>
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px;">
+          <small style="color:#666;">${date.toLocaleString()}</small>
+          <div>${resolvedText}</div>
+        </div>
       `;
       ul.appendChild(li);
     });
@@ -256,6 +327,29 @@ export function renderProfile(containerId) {
     listSection.appendChild(ul);
   }
   container.appendChild(listSection);
+
+  // Handlers para resolver apostas
+  document.getElementById('resolve-all-bets')?.addEventListener('click', () => {
+    const result = resolveAllPendingBets(usuario);
+    showMessage(`🎲 ${result.resolved} aposta(s) resolvida(s)! Ganhos: +${result.totalWinnings}Kz`, 'success');
+    renderProfile(containerId);
+    updateUserInfo();
+  });
+
+  container.addEventListener('click', (e) => {
+    if (e.target.classList.contains('resolve-btn')) {
+      const betIdx = parseInt(e.target.dataset.idx);
+      simulateBetResult(usuario, betIdx);
+      const bets = JSON.parse(localStorage.getItem('bets_' + usuario) || '[]');
+      const bet = bets[betIdx];
+      const msg = bet.status === 'won' 
+        ? `✅ Aposta Ganha! +${bet.winnings}Kz` 
+        : `❌ Aposta Perdida! -${bet.stake}Kz`;
+      showMessage(msg, bet.status === 'won' ? 'success' : 'error');
+      renderProfile(containerId);
+      updateUserInfo();
+    }
+  });
 
   document.getElementById('deposit-demo')?.addEventListener('click', () => {
     const novo = +(saldo + 100).toFixed(2);
