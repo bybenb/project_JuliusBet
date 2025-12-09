@@ -3,6 +3,8 @@ import { renderMatches, updateUserInfo, showMessage } from './bets.js';
 import { getSaldo, setSaldo } from './bets.js';
 
 // Renderizar partidas em containers conhecidos
+// Expor logout globalmente para links `javascript:logout()` em HTML
+window.logout = logout;
 document.addEventListener('DOMContentLoaded', () => {
   renderMatches('partidas');
   renderMatches('live-matches');
@@ -44,6 +46,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (usuarioLogado) {
     const auth = document.querySelector('.auth');
     if (auth) auth.innerHTML = `<span style="color: #0aff82; margin-right: 15px;">Olá, ${usuarioLogado}!</span><a href="javascript:logout();" class="btn login-btn">Sair</a>`;
+    // injetar links restritos na nav
+    const nav = document.querySelector('.nav');
+    if (nav && !nav.querySelector('.restricted-links')) {
+      const span = document.createElement('span');
+      span.className = 'restricted-links';
+      span.innerHTML = ` <a href="promocoes.html">Promoções</a> <a href="estatisticas.html">Estatísticas</a> <a href="perfil.html">Perfil</a>`;
+      nav.appendChild(span);
+    }
   }
 
   // Proteger páginas restritas
@@ -52,6 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
     showMessage('Área restrita: faça login.', 'error');
     setTimeout(() => location.href = 'conta.html#login', 700);
     return;
+  }
+
+  // Se estivermos na página de perfil, renderizar o conteúdo
+  if (currentPage === 'perfil.html') {
+    import('./bets.js').then(mod => {
+      mod.renderProfile('profile-container');
+    }).catch(err => console.error(err));
   }
 
   updateUserInfo();
