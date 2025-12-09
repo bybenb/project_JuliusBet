@@ -86,7 +86,93 @@ function rendeirizarJogos() {
     });
 }
 
-rendeirizarJogos();
+// Funções de saldo e apostas
+function getSaldo(usuario) {
+  const v = localStorage.getItem('saldo_' + usuario);
+  return v ? parseFloat(v) : null;
+}
+
+function setSaldo(usuario, valor) {
+  localStorage.setItem('saldo_' + usuario, String(valor));
+}
+
+function placeBet(teams, odd) {
+  const usuario = getUsuarioLogado();
+  if (!usuario) {
+    showMessage('Por favor, faça login para apostar.', 'error');
+    setTimeout(() => location.href = 'conta.html#login', 600);
+    return;
+  }
+
+  let saldo = getSaldo(usuario) || 0;
+  const raw = prompt(`Aposta em ${teams} (odd ${odd}). Saldo: ${saldo}. Insira valor:`,'10');
+  if (!raw) return;
+  const stake = parseFloat(raw);
+  if (isNaN(stake) || stake <= 0) { showMessage('Valor inválido.', 'error'); return; }
+  if (stake > saldo) { showMessage('Saldo insuficiente.', 'error'); return; }
+
+  saldo = +(saldo - stake).toFixed(2);
+  setSaldo(usuario, saldo);
+
+  const key = 'bets_' + usuario;
+  const bets = JSON.parse(localStorage.getItem(key) || '[]');
+  bets.push({ teams, odd, stake, time: Date.now() });
+  localStorage.setItem(key, JSON.stringify(bets));
+
+  updateUserInfo();
+  showMessage(`Aposta de ${stake} registrada. Novo saldo: ${saldo}`, 'success');
+}
+
+function updateUserInfo() {
+  const usuario = getUsuarioLogado();
+  const ui = document.getElementById('user-info');
+  if (ui) {
+    if (usuario) {
+      const saldo = getSaldo(usuario) ?? 0;
+      const bets = JSON.parse(localStorage.getItem('bets_' + usuario) || '[]');
+      ui.innerHTML = `Olá, <strong style="color:var(--cor-verde)">${usuario}</strong> — Saldo: <strong style="color:var(--cor-verde)">${saldo}</strong> — <a href="conta.html">Minha Conta</a> | <a href="javascript:logout()">Sair</a> | <a href="#" id="ver-apostas">Minhas Apostas (${bets.length})</a>`;
+      const btn = document.getElementById('ver-apostas');
+      if (btn) btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert(JSON.stringify(bets, null, 2));
+      });
+    } else {
+      ui.innerHTML = '<a href="conta.html#login" class="btn login-btn">Entrar</a> <a href="conta.html#register" class="btn signin-btn">Registrar</a>';
+    }
+  }
+}
+
+function renderMatches(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+
+  jogos.forEach(match => {
+    const card = document.createElement('div');
+    card.className = 'match-card';
+    card.innerHTML = `
+      <div class="match-title">${match.teams}</div>
+      <div class="match-sport">${match.sport}</div>
+      <div class="odds">
+        ${match.odds.map(o => `<button class="odd-btn" data-odd="${o}">${o}</button>`).join('')}
+      </div>
+    `;
+
+    container.appendChild(card);
+
+    // attach handlers
+    card.querySelectorAll('.odd-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const odd = parseFloat(btn.dataset.odd);
+        placeBet(match.teams, odd);
+      });
+    });
+  });
+}
+
+// render em possíveis containers
+renderMatches('partidas');
+renderMatches('live-matches');
 
 // ========== HANDLERS DE AUTENTICAÇÃO ==========
 
@@ -102,8 +188,10 @@ window.addEventListener('load', function() {
       
       if (autenticar(usuario, senha)) {
         setUsuarioLogado(usuario);
+        // garantir saldo inicial didático
+        if (getSaldo(usuario) === null) setSaldo(usuario, 1000);
         showMessage(`Bem-vindo, ${usuario}!`, 'success');
-        setTimeout(() => location.href = 'index.html', 1500);
+        setTimeout(() => { updateUserInfo(); location.href = 'ao-vivo.html'; }, 1500);
       } else {
         showMessage('Usuário ou senha incorretos.', 'error');
       }
@@ -141,6 +229,17 @@ window.addEventListener('load', function() {
       auth.innerHTML = `<span style="color: #0aff82; margin-right: 15px;">Olá, ${usuarioLogado}!</span><a href="javascript:logout();" class="btn login-btn">Sair</a>`;
     }
   }
+
+  // proteger páginas restritas
+  const currentPage = window.location.pathname.split('/').pop();
+  if (['promocoes.html','estatisticas.html'].includes(currentPage) && !getUsuarioLogado()) {
+    showMessage('Área restrita: faça login.', 'error');
+    setTimeout(() => location.href = 'conta.html#login', 700);
+    return;
+  }
+
+  // atualizar UI do usuário (saldo, contagem de apostas)
+  updateUserInfo();
 });
 
 // Função auxiliar para mostrar mensagens
