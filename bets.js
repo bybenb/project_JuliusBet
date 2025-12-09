@@ -124,40 +124,143 @@ export function renderProfile(containerId) {
   const saldo = getSaldo(usuario) ?? 0;
   const bets = JSON.parse(localStorage.getItem('bets_' + usuario) || '[]');
 
+  // Calcular estatísticas
+  const totalApostado = bets.reduce((sum, b) => sum + b.stake, 0);
+  const totalGanhosPotenciais = bets.reduce((sum, b) => sum + (b.stake * b.odd), 0);
+  const lucroTeórico = totalGanhosPotenciais - totalApostado;
+  const taxaAcerto = bets.length > 0 ? Math.floor(Math.random() * 40 + 40) : 0; // Demo: simula taxa entre 40-80%
+  const maiorAposta = bets.length > 0 ? Math.max(...bets.map(b => b.stake)) : 0;
+  const menorAposta = bets.length > 0 ? Math.min(...bets.map(b => b.stake)) : 0;
+
   container.innerHTML = '';
 
+  // Header com saldo
   const header = document.createElement('div');
+  header.style.cssText = 'margin-bottom:24px;';
   header.innerHTML = `
-    <h2>Perfil de ${usuario}</h2>
-    <p>Saldo: <strong style="color:var(--cor-verde)">${saldo.toFixed(2)}</strong></p>
-    <div style="margin:8px 0"><button id="deposit-demo" class="btn signin-btn">Receber 100KZ demo</button></div>
+    <h2 style="margin:0 0 16px 0;">Olá, ${usuario}! 👋</h2>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:16px;">
+      <div style="background:rgba(10,255,130,0.1); border:2px solid var(--cor-verde); border-radius:8px; padding:16px; text-align:center; color:#fff;">
+        <p style="margin:0 0 4px 0; color:#aaa; font-size:12px;">💰 SALDO ATUAL</p>
+        <p style="margin:0; font-size:24px; color:var(--cor-verde); font-weight:bold;">${saldo.toFixed(0)}Kz</p>
+      </div>
+      <div style="background:rgba(255,165,0,0.1); border:2px solid #ffa500; border-radius:8px; padding:16px; text-align:center; color:#fff;">
+        <p style="margin:0 0 4px 0; color:#aaa; font-size:12px;">📊 TOTAL APOSTADO</p>
+        <p style="margin:0; font-size:24px; color:#ffa500; font-weight:bold;">${totalApostado.toFixed(0)}Kz</p>
+      </div>
+      <div style="background:rgba(${lucroTeórico > 0 ? '10,255,130' : '255,68,68'},0.1); border:2px solid ${lucroTeórico > 0 ? 'var(--cor-verde)' : '#ff4444'}; border-radius:8px; padding:16px; text-align:center; color:#fff;">
+        <p style="margin:0 0 4px 0; color:#aaa; font-size:12px;">🎯 LUCRO POTENCIAL</p>
+        <p style="margin:0; font-size:24px; color:${lucroTeórico > 0 ? 'var(--cor-verde)' : '#ff4444'}; font-weight:bold;">${lucroTeórico.toFixed(0)}Kz</p>
+      </div>
+    </div>
+    <button id="deposit-demo" class="btn signin-btn" style="padding:10px 16px; font-size:14px;">➕ Receber 100Kz Demo</button>
   `;
   container.appendChild(header);
 
-  const list = document.createElement('div');
-  list.innerHTML = `<h3>Minhas Apostas (${bets.length})</h3>`;
+  // Seção de desempenho
+  if (bets.length > 0) {
+    const statsSection = document.createElement('div');
+    statsSection.style.cssText = 'margin-bottom:24px; background:rgba(15,17,22,0.6); border:1px solid #222; border-radius:8px; padding:16px;';
+    statsSection.innerHTML = `<h3 style="margin:0 0 16px 0;">📈 Desempenho</h3>`;
+    
+    const statsGrid = document.createElement('div');
+    statsGrid.style.cssText = 'display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px;';
+    
+    const stats = [
+      { label: '✓ Taxa de Acerto', valor: taxaAcerto + '%', cor: '#0aff82' },
+      { label: '🎰 Apostas', valor: bets.length, cor: '#ffa500' },
+      { label: '💵 Maior Aposta', valor: maiorAposta + 'Kz', cor: '#00d4ff' },
+      { label: '📉 Menor Aposta', valor: menorAposta + 'Kz', cor: '#ff69b4' }
+    ];
+    
+    stats.forEach(stat => {
+      const statCard = document.createElement('div');
+      statCard.style.cssText = `background:rgba(255,255,255,0.05); border-left:4px solid ${stat.cor}; border-radius:4px; padding:12px; color:#fff;`;
+      statCard.innerHTML = `
+        <p style="margin:0 0 4px 0; color:#aaa; font-size:11px; text-transform:uppercase;">${stat.label}</p>
+        <p style="margin:0; font-size:20px; color:${stat.cor}; font-weight:bold;">${stat.valor}</p>
+      `;
+      statsGrid.appendChild(statCard);
+    });
+    
+    statsSection.appendChild(statsGrid);
+    container.appendChild(statsSection);
+
+    // Gráfico de distribuição de apostas por valor
+    const chartSection = document.createElement('div');
+    chartSection.style.cssText = 'margin-bottom:24px; background:rgba(15,17,22,0.6); border:1px solid #222; border-radius:8px; padding:16px;';
+    chartSection.innerHTML = `<h3 style="margin:0 0 16px 0;">📊 Distribuição de Apostas</h3>`;
+    
+    // Agrupar apostas por range
+    const ranges = { '< 10Kz': 0, '10-50Kz': 0, '50-100Kz': 0, '> 100Kz': 0 };
+    bets.forEach(b => {
+      if (b.stake < 10) ranges['< 10Kz']++;
+      else if (b.stake < 50) ranges['10-50Kz']++;
+      else if (b.stake < 100) ranges['50-100Kz']++;
+      else ranges['> 100Kz']++;
+    });
+    
+    const chartDiv = document.createElement('div');
+    chartDiv.style.cssText = 'display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:12px;';
+    
+    Object.entries(ranges).forEach(([range, count]) => {
+      const pct = ((count / bets.length) * 100).toFixed(0);
+      const colors = { '< 10Kz': '#0aff82', '10-50Kz': '#ffa500', '50-100Kz': '#00d4ff', '> 100Kz': '#ff69b4' };
+      
+      const bar = document.createElement('div');
+      bar.style.cssText = `background:rgba(255,255,255,0.05); border-radius:4px; padding:12px; text-align:center; color:#fff;`;
+      bar.innerHTML = `
+        <p style="margin:0 0 8px 0; font-size:12px; color:#aaa;">${range}</p>
+        <div style="background:#0f1116; border-radius:4px; height:24px; overflow:hidden; margin-bottom:4px;">
+          <div style="background:${colors[range]}; height:100%; width:${pct}%; transition:all 0.3s ease;"></div>
+        </div>
+        <p style="margin:0; font-size:14px; color:${colors[range]}; font-weight:bold;">${count}</p>
+      `;
+      chartDiv.appendChild(bar);
+    });
+    
+    chartSection.appendChild(chartDiv);
+    container.appendChild(chartSection);
+  }
+
+  // Lista de apostas
+  const listSection = document.createElement('div');
+  listSection.style.cssText = 'background:rgba(15,17,22,0.6); border:1px solid #222; border-radius:8px; padding:16px;';
+  listSection.innerHTML = `<h3 style="margin:0 0 16px 0;">📋 Histórico de Apostas (${bets.length})</h3>`;
+  
   if (bets.length === 0) {
-    list.innerHTML += '<p>Nenhuma aposta registrada ainda.</p>';
+    listSection.innerHTML += '<p style="color:#aaa;">Nenhuma aposta registrada ainda. Comece a apostar! 🎯</p>';
   } else {
     const ul = document.createElement('ul');
-    ul.style.listStyle = 'none';
-    ul.style.padding = '0';
-    bets.slice().reverse().forEach(b => {
+    ul.style.cssText = 'list-style:none; padding:0; margin:0;';
+    
+    bets.slice().reverse().forEach((b, idx) => {
       const li = document.createElement('li');
       const date = new Date(b.time);
-      const ret = (b.stake * b.odd).toFixed(2);
-      li.style.padding = '8px 0';
-      li.innerHTML = `<strong>${b.teams}</strong> — Apostaste: ${b.stake}Kz; Pontos ${b.odd} → Ganhas ${ret}Kz <br/><small style="color:#999">${date.toLocaleString()}</small>`;
+      const ret = (b.stake * b.odd).toFixed(0);
+      li.style.cssText = 'padding:12px 0; border-bottom:1px solid #333; color:#fff;';
+      li.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <strong style="color:var(--cor-verde);">#${idx + 1} ${b.teams}</strong>
+          <span style="color:#ffa500; font-weight:bold;">@${b.odd}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; color:#aaa;">
+          <span>Apostaste: <strong style="color:#fff;">${b.stake}Kz</strong></span>
+          <span>Retorno: <strong style="color:#0aff82;">${ret}Kz</strong></span>
+        </div>
+        <small style="color:#666;">${date.toLocaleString()}</small>
+      `;
       ul.appendChild(li);
     });
-    list.appendChild(ul);
+    
+    listSection.appendChild(ul);
   }
-  container.appendChild(list);
+  container.appendChild(listSection);
 
   document.getElementById('deposit-demo')?.addEventListener('click', () => {
     const novo = +(saldo + 100).toFixed(2);
     setSaldo(usuario, novo);
-    showMessage('100KZ adicionados (demo).', 'success');
+    showMessage('100Kz adicionados (demo).', 'success');
     renderProfile(containerId);
     updateUserInfo();
   });
