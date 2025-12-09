@@ -1,14 +1,12 @@
-// Dados de usuários (carregados de usuarios.json)
-let usuariosGlobal = [];
+// Dados de usuários (in-memory, evita problema de CORS em dev)
+let usuariosGlobal = [
+  { usuario: 'beny', senha: 'beny2025' },
+  { usuario: 'aldo', senha: 'aldo2025' },
+  { usuario: 'nazare2025', senha: 'nazare2025' },
+  { usuario: 'etelvina', senha: 'etelvina123' }
+];
 
-// Carregar usuários do JSON
-fetch('usuarios.json')
-  .then(response => response.json())
-  .then(data => {
-    usuariosGlobal = data.usuarios;
-    console.log('Usuários carregados:', usuariosGlobal);
-  })
-  .catch(error => console.error('Erro ao carregar usuarios.json:', error));
+console.log('Usuários carregados (in-memory):', usuariosGlobal);
 
 // Verificar se há usuário logado no localStorage
 function getUsuarioLogado() {
@@ -105,22 +103,58 @@ function placeBet(teams, odd) {
   }
 
   let saldo = getSaldo(usuario) || 0;
-  const raw = prompt(`Aposta em ${teams} (odd ${odd}). Saldo: ${saldo}. Insira valor:`,'10');
-  if (!raw) return;
-  const stake = parseFloat(raw);
-  if (isNaN(stake) || stake <= 0) { showMessage('Valor inválido.', 'error'); return; }
-  if (stake > saldo) { showMessage('Saldo insuficiente.', 'error'); return; }
 
-  saldo = +(saldo - stake).toFixed(2);
-  setSaldo(usuario, saldo);
+  // Usar modal custom ao invés de prompt (melhor UX)
+  showBetModal(teams, odd, saldo, function(stake) {
+    if (isNaN(stake) || stake <= 0) { showMessage('Valor inválido.', 'error'); return; }
+    if (stake > saldo) { showMessage('Saldo insuficiente.', 'error'); return; }
 
-  const key = 'bets_' + usuario;
-  const bets = JSON.parse(localStorage.getItem(key) || '[]');
-  bets.push({ teams, odd, stake, time: Date.now() });
-  localStorage.setItem(key, JSON.stringify(bets));
+    saldo = +(saldo - stake).toFixed(2);
+    setSaldo(usuario, saldo);
 
-  updateUserInfo();
-  showMessage(`Aposta de ${stake} registrada. Novo saldo: ${saldo}`, 'success');
+    const key = 'bets_' + usuario;
+    const bets = JSON.parse(localStorage.getItem(key) || '[]');
+    bets.push({ teams, odd, stake, time: Date.now() });
+    localStorage.setItem(key, JSON.stringify(bets));
+
+    updateUserInfo();
+    showMessage(`Aposta de ${stake} registrada. Novo saldo: ${saldo}`, 'success');
+  });
+}
+
+// Modal simples para inserir valor da aposta
+function showBetModal(teams, odd, saldo, onConfirm) {
+  // evitar múltiplos modais
+  if (document.getElementById('bet-modal')) return;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'bet-modal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:2000;';
+
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#0f1116;padding:18px;border-radius:8px;max-width:360px;width:100%;color:#fff;border:1px solid #222;';
+
+  box.innerHTML = `
+    <h3 style="margin:0 0 8px 0">Aposta: ${teams}</h3>
+    <p style="margin:0 0 8px 0;color:#ccc">Odd: ${odd} — Saldo: ${saldo}</p>
+    <label style="font-size:14px">Valor</label>
+    <input id="bet-value" type="number" step="0.01" min="0" value="10" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #222;background:#0d0f16;color:#fff;" />
+    <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end;">
+      <button id="bet-cancel" class="btn login-btn" style="background:transparent;border:1px solid #0aff82;color:var(--cor-verde);">Cancelar</button>
+      <button id="bet-ok" class="btn signin-btn" style="background:var(--cor-verde);color:#000;">Confirmar</button>
+    </div>
+  `;
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  const cleanup = () => { overlay.remove(); };
+  document.getElementById('bet-cancel').addEventListener('click', cleanup);
+  document.getElementById('bet-ok').addEventListener('click', () => {
+    const raw = parseFloat(document.getElementById('bet-value').value);
+    cleanup();
+    onConfirm(raw);
+  });
 }
 
 function updateUserInfo() {
@@ -211,13 +245,14 @@ window.addEventListener('load', function() {
         showMessage('Preencha todos os campos.', 'error');
         return;
       }
-      
-      showMessage(`Conta criada com sucesso! Bem-vindo, ${nome}.`, 'success');
-      setTimeout(() => {
-        document.getElementById('rn').value = '';
-        document.getElementById('re').value = '';
-        document.getElementById('rp').value = '';
-      }, 1500);
+      // adicionar usuário ao array in-memory
+      const newUser = { usuario: nome, senha: senha };
+      usuariosGlobal.push(newUser);
+      // opcional: logar automaticamente e dar saldo inicial
+      setUsuarioLogado(nome);
+      setSaldo(nome, 1000);
+      showMessage(`Conta criada e logado como ${nome}.`, 'success');
+      setTimeout(() => { updateUserInfo(); location.href = 'ao-vivo.html'; }, 1200);
     });
   }
 
