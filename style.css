@@ -270,6 +270,14 @@ body {
 .aviator .aviator-top { display:flex; justify-content:space-between; align-items:center; }
 .aviator input[type="number"] { -moz-appearance: textfield; }
 
+/* Aviator history / timer panel */
+.aviator-history { background: rgba(255,255,255,0.02); padding: 8px; border-radius:6px; border: 1px solid rgba(255,255,255,0.03); }
+.aviator-history li { display:flex; justify-content:space-between; padding:8px 6px; border-bottom:1px solid rgba(255,255,255,0.02); font-size:13px; }
+.aviator-history li:last-child { border-bottom: none; }
+.aviator-history .round-mult { font-weight:700; color:var(--cor-verde); }
+.aviator-history .round-time { color:#aaa; font-size:12px; }
+.aviator-timer { font-weight:bold; font-size:16px; }
+
 
 
 /* Mobile / Responsive rules */
