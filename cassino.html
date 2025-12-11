@@ -44,6 +44,15 @@
               </div>
             </div>
 
+            <div class="aviator-visual" style="margin-top:12px;">
+              <div class="aviator-stage" style="position:relative;height:140px;overflow:hidden;">
+                <img id="aviator-plane" src="games/img/img_aviator.png" alt="avião" style="position:absolute;left:16px;bottom:8px;height:56px;transform-origin:center;transition:transform 120ms linear;" />
+                <div id="aviator-bars" class="aviator-bars" style="position:absolute;right:12px;bottom:8px;display:flex;gap:6px;align-items:end;height:100%;">
+                  <!-- bars injected by JS -->
+                </div>
+              </div>
+            </div>
+
             <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
               <input id="aviator-stake" type="number" min="1" value="10" style="padding:8px;border-radius:6px;border:1px solid #222;background:#0d0f16;color:#fff;width:120px;" />
               <button id="aviator-place" class="btn signin-btn">Colocar Aposta</button>

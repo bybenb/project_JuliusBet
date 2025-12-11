@@ -278,6 +278,20 @@ body {
 .aviator-history .round-time { color:#aaa; font-size:12px; }
 .aviator-timer { font-weight:bold; font-size:16px; }
 
+/* Plane graphic + bars */
+.aviator-visual { margin-top: 8px; }
+.aviator-stage { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.06)); border-radius:8px; padding:8px; }
+.aviator-bars { height: 120px; }
+.aviator-bars .bar { width:6px; background: linear-gradient(180deg, rgba(10,255,130,0.9), rgba(10,255,130,0.25)); border-radius:3px; transition:height 220ms ease; opacity:0.95; }
+.aviator-bars .bar.dim { background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); }
+
+/* plane motion (just easing via transform) */
+.aviator-plane { transition: transform 120ms linear; }
+
+/* small control to mute sounds */
+.aviator-controls { margin-top:8px; display:flex; gap:8px; align-items:center; }
+.aviator-controls .mute { background:transparent; border:1px solid rgba(255,255,255,0.04); color:#ccc; padding:6px 8px; border-radius:6px; }
+
 
 
 /* Mobile / Responsive rules */
