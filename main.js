@@ -28,17 +28,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const ham = document.createElement('button');
     ham.className = 'hamburger';
+    ham.type = 'button';
     ham.setAttribute('aria-label', 'Abrir menu');
-    ham.innerHTML = '\u2630'; // simple hamburger icon
+    ham.setAttribute('aria-expanded', 'false');
+    // use FontAwesome bars icon
+    ham.innerHTML = '<i class="fa-solid fa-bars" aria-hidden="true"></i>';
 
     // Insert hamburger at start of header (before logo)
     header.insertBefore(ham, header.firstChild);
 
     const nav = header.querySelector('.nav');
-    ham.addEventListener('click', (e) => {
-      e.stopPropagation();
+    function toggleNav() {
       if (!nav) return;
-      nav.classList.toggle('open');
+      const open = nav.classList.toggle('open');
+      ham.setAttribute('aria-expanded', open ? 'true' : 'false');
+      ham.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+    }
+
+    ham.addEventListener('click', (e) => { e.stopPropagation(); toggleNav(); });
+    // keyboard support: Enter or Space
+    ham.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleNav(); }
     });
 
     // close menu when clicking outside or on link
@@ -48,7 +58,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!header.contains(ev.target)) nav.classList.remove('open');
     }, true);
 
-    nav?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('open')));
+    nav?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+      nav.classList.remove('open');
+      ham.setAttribute('aria-expanded', 'false');
+      ham.setAttribute('aria-label', 'Abrir menu');
+    }));
   })();
 
   // Login handler

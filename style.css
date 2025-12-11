@@ -64,6 +64,11 @@ body {
     font-weight: bold;
 }
 
+/* Hide mobile hamburger by default on desktop */
+.hamburger {
+    display: none;
+}
+
 .login-btn {
     background: transparent;
     color: var(--cor_verde);
