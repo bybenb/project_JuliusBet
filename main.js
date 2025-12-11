@@ -1,5 +1,5 @@
 import { autenticar, getUsuarioLogado, setUsuarioLogado, registerUser, logout } from './auth.js';
-import { renderMatches, updateUserInfo, showMessage, renderProfile, renderPromocoes, renderEstatisticas, simulateBetResult, resolveAllPendingBets } from './bets.js';
+import { renderMatches, renderLiveMatches, startLiveOddsSimulation, updateUserInfo, showMessage, renderProfile, renderPromocoes, renderEstatisticas, simulateBetResult, resolveAllPendingBets } from './bets.js';
 import { getSaldo, setSaldo } from './bets.js';
 
 // Inject FontAwesome CDN for icons (used across pages)
@@ -17,7 +17,17 @@ import { getSaldo, setSaldo } from './bets.js';
 window.logout = logout;
 document.addEventListener('DOMContentLoaded', () => {
   renderMatches('partidas');
-  renderMatches('live-matches');
+  // Ao-Vivo: render enhanced live matches and start simulation
+  if (document.getElementById('live-matches')) {
+    // expose to window for small inline integration in ao-vivo.html
+    window.renderLiveMatches = renderLiveMatches;
+    window.startLiveOddsSimulation = startLiveOddsSimulation;
+    renderLiveMatches('live-matches');
+    // start simulation and store stop function on window for debugging
+    window._stopLiveSim = startLiveOddsSimulation('live-matches', 3500);
+  } else {
+    renderMatches('live-matches');
+  }
 
   // Mobile menu: inject hamburger button and toggle nav
   (function setupMobileMenu(){

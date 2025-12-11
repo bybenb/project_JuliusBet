@@ -27,6 +27,28 @@
 
       <div id="user-info" style="margin-bottom:16px; color:#ccc;"></div>
 
+      <div class="live-controls" style="margin-bottom:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <input id="live-search" type="search" placeholder="Buscar equipes ou competição" style="flex:1; padding:8px 12px; border-radius:6px; border:1px solid #222; background:#0d0f16; color:#fff;" />
+        <select id="live-filter" style="padding:8px 12px; border-radius:6px; border:1px solid #222; background:#0d0f16; color:#fff;">
+          <option value="">Filtrar por modalidade</option>
+          <option value="Futebol">Futebol</option>
+          <option value="Basquetebol">Basquetebol</option>
+          <option value="Esports">Esports</option>
+          <option value="BlueLock">BlueLock</option>
+          <option value="FreeStyle-Rap">FreeStyle-Rap</option>
+        </select>
+        <select id="live-sort" style="padding:8px 12px; border-radius:6px; border:1px solid #222; background:#0d0f16; color:#fff;">
+          <option value="recommended">Ordenar: Recomendado</option>
+          <option value="highest_odd">Ordenar: Maior odd</option>
+          <option value="teams">Ordenar: Equipes (A→Z)</option>
+          <option value="favorites">Ordenar: Favoritos</option>
+        </select>
+        <label style="display:inline-flex; align-items:center; gap:6px; color:#ccc;">
+          <input id="live-group" type="checkbox" style="transform:scale(1.05)" /> Agrupar por esporte
+        </label>
+        <button id="live-refresh" class="btn login-btn" style="padding:8px 12px;">Atualizar</button>
+      </div>
+
       <div class="matches-container" id="live-matches">
         <!-- partidas renderizadas dinamicamente -->
       </div>
@@ -37,5 +59,18 @@
     <footer class="footer">JuliusBet © 2025</footer>
 
     <script type="module" src="main.js"></script>
+    <script>
+      // wire search/filter interactions to re-render live matches
+      document.addEventListener('DOMContentLoaded', function(){
+        const search = document.getElementById('live-search');
+        const filter = document.getElementById('live-filter');
+        const sort = document.getElementById('live-sort');
+        const group = document.getElementById('live-group');
+        const refresh = document.getElementById('live-refresh');
+        function rerender(){ if (window.renderLiveMatches) renderLiveMatches('live-matches'); }
+        [search, filter, sort, group].forEach(el => el?.addEventListener('input', () => rerender()));
+        refresh?.addEventListener('click', () => rerender());
+      });
+    </script>
   </body>
 </html>

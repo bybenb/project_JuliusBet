@@ -117,6 +117,184 @@ export function renderMatches(containerId) {
   });
 }
 
+// ===== Ao-Vivo: live rendering and odds simulation =====
+export function renderLiveMatches(containerId, options = {}) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+
+  // read filters
+  const search = document.getElementById('live-search')?.value?.toLowerCase() || '';
+  const filter = document.getElementById('live-filter')?.value || '';
+
+  // Build filtered list first (so we can sort/group)
+  const filtered = jogos
+    .map((match) => ({
+      match,
+      teams: (match.teams || ''),
+      sport: (match.sport || ''),
+      slug: (match.teams || '').replace(/[^a-z0-9]/gi, '_').toLowerCase(),
+      highestOdd: Math.max(...(match.odds || [0]))
+    }))
+    .filter(item => {
+      if (search && !(item.teams.toLowerCase().includes(search) || item.sport.toLowerCase().includes(search))) return false;
+      if (filter && item.sport !== filter) return false;
+      return true;
+    });
+
+  // read sort/group controls
+  const sort = document.getElementById('live-sort')?.value || 'recommended';
+  const group = document.getElementById('live-group')?.checked || false;
+
+  // apply sorting
+  if (sort === 'highest_odd') {
+    filtered.sort((a, b) => b.highestOdd - a.highestOdd);
+  } else if (sort === 'teams') {
+    filtered.sort((a, b) => a.teams.localeCompare(b.teams));
+  } else if (sort === 'favorites') {
+    filtered.sort((a, b) => {
+      const fa = localStorage.getItem('fav_' + a.slug) === '1' ? 0 : 1;
+      const fb = localStorage.getItem('fav_' + b.slug) === '1' ? 0 : 1;
+      if (fa !== fb) return fa - fb;
+      return b.highestOdd - a.highestOdd;
+    });
+  } else {
+    // recommended: show favorites first, then by highest odd
+    filtered.sort((a, b) => {
+      const fa = localStorage.getItem('fav_' + a.slug) === '1' ? 0 : 1;
+      const fb = localStorage.getItem('fav_' + b.slug) === '1' ? 0 : 1;
+      if (fa !== fb) return fa - fb;
+      return b.highestOdd - a.highestOdd;
+    });
+  }
+
+  // Helper to render a single item into container
+  function renderItem(item) {
+    const match = item.match;
+    const teams = item.teams;
+    const sport = item.sport;
+    const slug = item.slug;
+    const favKey = 'fav_' + slug;
+    const fav = localStorage.getItem(favKey) === '1';
+
+    const card = document.createElement('div');
+    card.className = 'match-card live-card';
+    card.dataset.matchId = slug;
+    card.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div class="match-title">${teams}</div>
+          <div class="match-sport">${sport} <span class="live-badge">AO VIVO</span></div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="fav-btn" data-id="${slug}" aria-label="Favoritar" title="Favoritar">${fav ? '<i class="fa-solid fa-star" style="color:var(--cor-verde)"></i>' : '<i class="fa-regular fa-star" style="color:#ccc"></i>'}</button>
+        </div>
+      </div>
+      <div class="odds" style="margin-top:12px; display:flex; gap:8px;">
+        ${match.odds.map((o, idx) => `<button class="odd-btn live-odd" data-match="${slug}" data-idx="${idx}" data-odd="${o}">${o}</button>`).join('')}
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:12px; color:#aaa;">
+        <small class="match-time">Atualizado: agora</small>
+        <div>
+          <button class="btn login-btn quick-bet" data-match="${slug}">Apostar</button>
+        </div>
+      </div>
+    `;
+
+    container.appendChild(card);
+  }
+
+  if (group) {
+    // group by sport
+    const groups = filtered.reduce((acc, item) => {
+      acc[item.sport] = acc[item.sport] || [];
+      acc[item.sport].push(item);
+      return acc;
+    }, {});
+
+    Object.keys(groups).sort().forEach(sportName => {
+      const list = groups[sportName];
+      const header = document.createElement('div');
+      header.className = 'sport-group';
+      header.innerHTML = `<h3 style="margin:0 0 8px 0;">${sportName} <small style='color:#aaa;font-weight:400;margin-left:8px'>(${list.length})</small></h3>`;
+      container.appendChild(header);
+      list.forEach(item => renderItem(item));
+    });
+  } else {
+    filtered.forEach(item => renderItem(item));
+  }
+
+  // attach handlers
+  container.querySelectorAll('.fav-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = btn.dataset.id;
+      const key = 'fav_' + id;
+      const isFav = localStorage.getItem(key) === '1';
+      if (isFav) { localStorage.removeItem(key); btn.innerHTML = '<i class="fa-regular fa-star" style="color:#ccc"></i>'; }
+      else { localStorage.setItem(key, '1'); btn.innerHTML = '<i class="fa-solid fa-star" style="color:var(--cor-verde)"></i>'; }
+    });
+  });
+
+  // quick bet button - opens modal for the first odd
+  container.querySelectorAll('.quick-bet').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const matchId = btn.dataset.match;
+      const match = jogos.find(j => j.teams.replace(/[^a-z0-9]/gi, '_').toLowerCase() === matchId);
+      if (!match) return;
+      // default to first odd
+      const odd = parseFloat(match.odds[0]);
+      placeBet(match.teams, odd);
+    });
+  });
+
+  // odd buttons handler
+  container.querySelectorAll('.live-odd').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const odd = parseFloat(btn.dataset.odd);
+      const matchId = btn.dataset.match;
+      const match = jogos.find(j => j.teams.replace(/[^a-z0-9]/gi, '_').toLowerCase() === matchId);
+      if (!match) return;
+      placeBet(match.teams, odd);
+    });
+  });
+}
+
+export function startLiveOddsSimulation(containerId, interval = 3500) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  // periodic update
+  const tick = () => {
+    // pick 1-2 random matches and change a random odd slightly
+    const count = Math.max(1, Math.floor(Math.random() * 2) + 1);
+    for (let i=0;i<count;i++) {
+      const mi = Math.floor(Math.random() * jogos.length);
+      const match = jogos[mi];
+      if (!match || !match.odds || match.odds.length === 0) continue;
+      const oi = Math.floor(Math.random() * match.odds.length);
+      const current = parseFloat(match.odds[oi]);
+      const delta = (Math.random() * 0.2) * (Math.random() > 0.5 ? 1 : -1);
+      let next = +(Math.max(1, current + delta)).toFixed(2);
+      match.odds[oi] = next;
+
+      // update DOM button if present
+      const btn = container.querySelector(`button.live-odd[data-match="${match.teams.replace(/[^a-z0-9]/gi, '_').toLowerCase()}"][data-idx="${oi}"]`);
+      if (btn) {
+        const old = parseFloat(btn.dataset.odd);
+        btn.dataset.odd = next;
+        btn.textContent = next;
+        // animation class
+        btn.classList.add(next > old ? 'odd-up' : 'odd-down');
+        setTimeout(() => btn.classList.remove('odd-up','odd-down'), 800);
+      }
+    }
+  };
+
+  const id = setInterval(tick, interval);
+  // return a function to stop
+  return () => clearInterval(id);
+}
+
 export function simulateBetResult(usuario, betIndex) {
   const key = 'bets_' + usuario;
   const bets = JSON.parse(localStorage.getItem(key) || '[]');
