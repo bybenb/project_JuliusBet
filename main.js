@@ -9,6 +9,38 @@ document.addEventListener('DOMContentLoaded', () => {
   renderMatches('partidas');
   renderMatches('live-matches');
 
+  // Mobile menu: inject hamburger button and toggle nav
+  (function setupMobileMenu(){
+    const header = document.querySelector('.header');
+    if (!header) return;
+    // avoid double-inject
+    if (document.querySelector('.hamburger')) return;
+
+    const ham = document.createElement('button');
+    ham.className = 'hamburger';
+    ham.setAttribute('aria-label', 'Abrir menu');
+    ham.innerHTML = '\u2630'; // simple hamburger icon
+
+    // Insert hamburger at start of header (before logo)
+    header.insertBefore(ham, header.firstChild);
+
+    const nav = header.querySelector('.nav');
+    ham.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!nav) return;
+      nav.classList.toggle('open');
+    });
+
+    // close menu when clicking outside or on link
+    document.addEventListener('click', (ev) => {
+      if (!nav) return;
+      if (!nav.classList.contains('open')) return;
+      if (!header.contains(ev.target)) nav.classList.remove('open');
+    }, true);
+
+    nav?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('open')));
+  })();
+
   // Login handler
   const loginForm = document.querySelector('form[data-form="login"]');
   if (loginForm) {

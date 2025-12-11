@@ -183,6 +183,89 @@ body {
 }
 
 
+/* Mobile / Responsive rules */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .logo {
+        font-size: 22px;
+    }
+
+    .nav {
+        width: 100%;
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+        background: transparent;
+        padding: 8px 0;
+    }
+
+    .nav.open {
+        display: flex;
+    }
+
+    .nav a {
+        margin: 6px 0;
+        padding: 8px 12px;
+        border-radius: 6px;
+        display: block;
+        color: #ddd;
+    }
+
+    .auth {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .hamburger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--cor-verde);
+        border: 1px solid rgba(10,255,130,0.12);
+        cursor: pointer;
+    }
+
+    .banner {
+        padding: 36px 16px;
+    }
+
+    .banner h1 {
+        font-size: 22px;
+    }
+
+    .matches-section {
+        padding: 20px 12px;
+    }
+
+    .matches-container {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .match-card {
+        padding: 12px;
+    }
+
+    .dono {
+        right: 8px;
+        bottom: 8px;
+        font-size: 11px;
+    }
+}
+
+
 
 
 
