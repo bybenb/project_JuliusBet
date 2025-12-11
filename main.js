@@ -65,9 +65,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     nav?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
       nav.classList.remove('open');
+      ham.classList.remove('open');
       ham.setAttribute('aria-expanded', 'false');
       ham.setAttribute('aria-label', 'Abrir menu');
     }));
+
+    // update ham open class when nav toggles (ensure initial state)
+    // When toggleNav runs it already sets icon class; add/remove ham.open class there too.
   })();
 
   // Login handler

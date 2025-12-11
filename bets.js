@@ -39,6 +39,7 @@ export function showBetModal(teams, odd, saldo, onConfirm) {
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:2000;';
   const box = document.createElement('div');
   box.style.cssText = 'background:#0f1116;padding:18px;border-radius:8px;max-width:360px;width:100%;color:#fff;border:1px solid #222;';
+  box.classList.add('bet-box');
   box.innerHTML = `
     <h3 style="margin:0 0 8px 0">Aposta: ${teams}</h3>
     <p style="margin:0 0 8px 0;color:#ccc">Odd: ${odd} — Saldo: ${saldo}</p>

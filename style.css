@@ -155,6 +155,52 @@ body {
     opacity: 0.85;
 }
 
+/* Toast and modal animations */
+@keyframes slideIn {
+    from { transform: translateY(-10px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes popIn {
+    from { transform: scale(0.96); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+/* Toast default (used by showMessage inline style animation name) */
+.toast {
+    animation: slideIn 300ms ease-out;
+}
+
+/* Modal inner box animation */
+#bet-modal .bet-box {
+    animation: popIn 220ms cubic-bezier(.2,.8,.2,1);
+}
+
+/* Match card hover lift */
+.match-card {
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.match-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+}
+
+/* Odds button micro-interactions */
+.odd-btn {
+    transition: transform 140ms ease, box-shadow 140ms ease, opacity 120ms ease;
+}
+.odd-btn:active { transform: translateY(1px) scale(0.995); }
+.odd-btn:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 6px 18px rgba(10,255,130,0.08); }
+
+/* Hamburger icon rotation/smooth swap */
+.hamburger i {
+    transition: transform 220ms ease, opacity 160ms ease;
+    display: inline-block;
+}
+.hamburger.open i {
+    transform: rotate(90deg) scale(1.05);
+}
+
 
 .footer {
     margin-top: 40px;
