@@ -262,6 +262,15 @@ body {
 }
 .sport-group h3 { color: #fff; font-size:16px; }
 
+/* Aviator styles */
+.aviator { margin-top:8px; }
+.aviator .multiplier { font-size:34px; font-weight:bold; color:var(--cor-verde); }
+.aviator .multiplier.crash { color: #ff4444; }
+.aviator .multiplier.win { color: #0aff82; }
+.aviator .aviator-top { display:flex; justify-content:space-between; align-items:center; }
+.aviator input[type="number"] { -moz-appearance: textfield; }
+
+
 
 /* Mobile / Responsive rules */
 @media (max-width: 768px) {
