@@ -16,6 +16,11 @@ let cashedOut = false;
 let localTabId = `tab_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 let isLeader = false;
 let rafId = null;
+let planeEl = null;
+let bars = [];
+let audioCtx = null;
+let muted = false;
+let prevRoundState = null;
 
 function format(n) { return Number(n).toFixed(2); }
 
@@ -158,7 +163,28 @@ function startAnimationLoop() {
   function tick() {
     const raw = localStorage.getItem(ROUND_KEY);
     const round = raw ? JSON.parse(raw) : null;
+    // detect state transitions
+    const newState = round ? round.state : null;
+    if (prevRoundState !== newState) {
+      // scheduled -> running
+      if (prevRoundState === 'scheduled' && newState === 'running') {
+        if (!muted) playStartSound();
+      }
+      // running -> ended/crashed
+      if (prevRoundState === 'running' && (newState === 'ended' || newState === 'crashed')) {
+        if (!muted) playCrashSound();
+      }
+      prevRoundState = newState;
+    }
+
     updateUIFromRound(round);
+    // update visuals
+    try {
+      const now = Date.now();
+      const mult = computeMultiplierForRound(round, now);
+      updateVisuals(mult, round && round.state === 'running' ? false : false);
+    } catch (e) { }
+
     rafId = requestAnimationFrame(tick);
   }
   if (rafId) cancelAnimationFrame(rafId);
@@ -274,6 +300,98 @@ function placeStake() {
   showMessage(`Aposta de ${v}Kz colocada.`, 'success');
 }
 
+// --- Visuals & Audio helpers ---
+function initVisuals() {
+  planeEl = document.getElementById('aviator-plane');
+  const barsContainer = document.getElementById('aviator-bars');
+  if (!barsContainer) return;
+  bars = [];
+  // create 12 bars
+  for (let i=0;i<12;i++) {
+    const b = document.createElement('div');
+    b.className = 'bar';
+    b.style.height = '6px';
+    b.style.opacity = String(0.9 - i*0.03);
+    barsContainer.appendChild(b);
+    bars.push(b);
+  }
+  const muteBtn = document.getElementById('aviator-mute');
+  if (muteBtn) {
+    muteBtn.addEventListener('click', () => {
+      muted = !muted;
+      muteBtn.textContent = muted ? 'Som off' : 'Mudo';
+    });
+  }
+}
+
+function ensureAudio() {
+  if (audioCtx || typeof window === 'undefined') return;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  } catch (e) { audioCtx = null; }
+}
+
+function playTone(freq, duration = 120, type='sine', vol=0.05) {
+  if (muted) return;
+  ensureAudio();
+  if (!audioCtx) return;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type;
+  o.frequency.value = freq;
+  g.gain.value = vol;
+  o.connect(g);
+  g.connect(audioCtx.destination);
+  const now = audioCtx.currentTime;
+  g.gain.setValueAtTime(0, now);
+  g.gain.linearRampToValueAtTime(vol, now + 0.01);
+  o.start(now);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + duration/1000);
+  o.stop(now + duration/1000 + 0.02);
+}
+
+function playStartSound() {
+  if (muted) return;
+  ensureAudio();
+  const seq = [440, 520, 660];
+  seq.forEach((f,i) => setTimeout(()=>playTone(f,90,'sine',0.04), i*90));
+}
+
+function playCashoutSound() {
+  if (muted) return;
+  ensureAudio();
+  playTone(880, 80, 'sine', 0.04);
+  setTimeout(()=>playTone(660, 120, 'sine', 0.03), 90);
+}
+
+function playCrashSound() {
+  if (muted) return;
+  ensureAudio();
+  playTone(120, 250, 'sawtooth', 0.08);
+}
+
+function updateVisuals(multiplier, crashed) {
+  try {
+    const max = 30;
+    const norm = Math.min(multiplier, max) / max; // 0..1
+    if (planeEl) {
+      const upPx = Math.round(norm * 110);
+      planeEl.style.transform = `translateY(-${upPx}px) rotate(-8deg) scale(${1 + norm*0.08})`;
+    }
+    // animate bars
+    if (bars && bars.length) {
+      bars.forEach((b, idx) => {
+        // create wave-like variation
+        const phase = (idx / bars.length) * Math.PI;
+        const h = Math.round(6 + (norm * 100) * (0.4 + 0.6 * Math.abs(Math.sin(Date.now()/400 + phase))));
+        b.style.height = `${h}px`;
+        // dim when low
+        if (norm < 0.06) b.classList.add('dim'); else b.classList.remove('dim');
+      });
+    }
+  } catch (e) { }
+}
+
 function computeCurrentRound() {
   const raw = localStorage.getItem(ROUND_KEY);
   return raw ? JSON.parse(raw) : null;
@@ -297,6 +415,7 @@ function cashout() {
   showMessage(`CASHOUT! +${payout}Kz (@ ${format(mult)}x)`, 'success');
   currentStake = 0;
   updateSaldoDisplay();
+  if (!muted) playCashoutSound();
 }
 
 function forceStart() {
@@ -314,6 +433,9 @@ function setup() {
   place?.addEventListener('click', placeStake);
   start?.addEventListener('click', forceStart);
   cash?.addEventListener('click', cashout);
+
+  // visuals init
+  initVisuals();
 
   tryBecomeLeader();
   setInterval(() => { refreshLeaderStamp(); }, 2000);
