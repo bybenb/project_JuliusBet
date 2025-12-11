@@ -2,6 +2,16 @@ import { autenticar, getUsuarioLogado, setUsuarioLogado, registerUser, logout } 
 import { renderMatches, updateUserInfo, showMessage, renderProfile, renderPromocoes, renderEstatisticas, simulateBetResult, resolveAllPendingBets } from './bets.js';
 import { getSaldo, setSaldo } from './bets.js';
 
+// Inject FontAwesome CDN for icons (used across pages)
+(function injectFontAwesome(){
+  if (document.head.querySelector('link[href*="font-awesome"]') || document.head.querySelector('link[href*="fontawesome"]')) return;
+  const fa = document.createElement('link');
+  fa.rel = 'stylesheet';
+  fa.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+  fa.crossOrigin = 'anonymous';
+  document.head.appendChild(fa);
+})();
+
 // Renderizar partidas em containers conhecidos
 // Expor logout globalmente para links `javascript:logout()` em HTML
 window.logout = logout;

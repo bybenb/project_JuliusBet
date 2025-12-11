@@ -25,7 +25,8 @@ export function showMessage(msg, type = 'info') {
   if (type === 'success') { div.style.backgroundColor = '#0aff82'; div.style.color = '#000'; }
   else if (type === 'error') div.style.backgroundColor = '#ff4444';
   else div.style.backgroundColor = '#0aff82';
-  div.textContent = msg;
+  // allow icons/html in messages (messages are generated internally)
+  div.innerHTML = msg;
   document.body.appendChild(div);
   setTimeout(() => div.remove(), 3000);
 }
@@ -166,9 +167,9 @@ export function getBetStatusColor(status) {
 }
 
 export function getBetStatusIcon(status) {
-  if (status === 'won') return '✅';
-  if (status === 'lost') return '❌';
-  return '⏳';
+  if (status === 'won') return '<i class="fa-solid fa-check-circle" aria-hidden="true" style="color:#0aff82;margin-right:6px"></i>';
+  if (status === 'lost') return '<i class="fa-solid fa-times-circle" aria-hidden="true" style="color:#ff4444;margin-right:6px"></i>';
+  return '<i class="fa-solid fa-hourglass-half" aria-hidden="true" style="color:#ffa500;margin-right:6px"></i>';
 }
 
 export function renderProfile(containerId) {
@@ -193,26 +194,26 @@ export function renderProfile(containerId) {
 
   container.innerHTML = '';
 
-  // Header com saldo
+  // Header com saldo (usar ícones FontAwesome)
   const header = document.createElement('div');
   header.style.cssText = 'margin-bottom:24px;';
   header.innerHTML = `
-    <h2 style="margin:0 0 16px 0;">Olá, ${usuario}! 👋</h2>
+    <h2 style="margin:0 0 16px 0;"><i class=\"fa-solid fa-user\" aria-hidden=\"true\" style=\"color:var(--cor-verde);margin-right:8px\"></i>Olá, ${usuario}!</h2>
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:16px;">
       <div style="background:rgba(10,255,130,0.1); border:2px solid var(--cor-verde); border-radius:8px; padding:16px; text-align:center; color:#fff;">
-        <p style="margin:0 0 4px 0; color:#aaa; font-size:12px;">💰 SALDO ATUAL</p>
+        <p style="margin:0 0 4px 0; color:#aaa; font-size:12px;"><i class=\"fa-solid fa-wallet\" aria-hidden=\"true\" style=\"margin-right:6px\"></i> SALDO ATUAL</p>
         <p style="margin:0; font-size:24px; color:var(--cor-verde); font-weight:bold;">${saldo.toFixed(0)}Kz</p>
       </div>
       <div style="background:rgba(255,165,0,0.1); border:2px solid #ffa500; border-radius:8px; padding:16px; text-align:center; color:#fff;">
-        <p style="margin:0 0 4px 0; color:#aaa; font-size:12px;">📊 TOTAL APOSTADO</p>
+        <p style="margin:0 0 4px 0; color:#aaa; font-size:12px;"><i class=\"fa-solid fa-chart-line\" aria-hidden=\"true\" style=\"margin-right:6px\"></i> TOTAL APOSTADO</p>
         <p style="margin:0; font-size:24px; color:#ffa500; font-weight:bold;">${totalApostado.toFixed(0)}Kz</p>
       </div>
       <div style="background:rgba(${lucroTeórico > 0 ? '10,255,130' : '255,68,68'},0.1); border:2px solid ${lucroTeórico > 0 ? 'var(--cor-verde)' : '#ff4444'}; border-radius:8px; padding:16px; text-align:center; color:#fff;">
-        <p style="margin:0 0 4px 0; color:#aaa; font-size:12px;">🎯 LUCRO POTENCIAL</p>
+        <p style="margin:0 0 4px 0; color:#aaa; font-size:12px;"><i class=\"fa-solid fa-bullseye\" aria-hidden=\"true\" style=\"margin-right:6px\"></i> LUCRO POTENCIAL</p>
         <p style="margin:0; font-size:24px; color:${lucroTeórico > 0 ? 'var(--cor-verde)' : '#ff4444'}; font-weight:bold;">${lucroTeórico.toFixed(0)}Kz</p>
       </div>
     </div>
-    <button id="deposit-demo" class="btn signin-btn" style="padding:10px 16px; font-size:14px;">➕ Receber 100Kz Demo</button>
+    <button id="deposit-demo" class="btn signin-btn" style="padding:10px 16px; font-size:14px;"><i class=\"fa-solid fa-plus\" aria-hidden=\"true\" style=\"margin-right:6px\"></i>Receber 100Kz Demo</button>
   `;
   container.appendChild(header);
 
@@ -220,16 +221,16 @@ export function renderProfile(containerId) {
   if (bets.length > 0) {
     const statsSection = document.createElement('div');
     statsSection.style.cssText = 'margin-bottom:24px; background:rgba(15,17,22,0.6); border:1px solid #222; border-radius:8px; padding:16px;';
-    statsSection.innerHTML = `<h3 style="margin:0 0 16px 0;">📈 Desempenho</h3>`;
+    statsSection.innerHTML = `<h3 style="margin:0 0 16px 0;"><i class=\"fa-solid fa-chart-line\" aria-hidden=\"true\" style=\"margin-right:8px\"></i>Desempenho</h3>`;
     
     const statsGrid = document.createElement('div');
     statsGrid.style.cssText = 'display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px;';
     
     const stats = [
       { label: '✓ Taxa de Acerto', valor: taxaAcerto + '%', cor: '#0aff82' },
-      { label: '🎰 Apostas', valor: bets.length, cor: '#ffa500' },
-      { label: '💵 Maior Aposta', valor: maiorAposta + 'Kz', cor: '#00d4ff' },
-      { label: '📉 Menor Aposta', valor: menorAposta + 'Kz', cor: '#ff69b4' }
+      { label: '<i class="fa-solid fa-list" aria-hidden="true" style="margin-right:6px"></i> Apostas', valor: bets.length, cor: '#ffa500' },
+      { label: '<i class="fa-solid fa-coins" aria-hidden="true" style="margin-right:6px"></i> Maior Aposta', valor: maiorAposta + 'Kz', cor: '#00d4ff' },
+      { label: '<i class="fa-solid fa-chart-simple" aria-hidden="true" style="margin-right:6px"></i> Menor Aposta', valor: menorAposta + 'Kz', cor: '#ff69b4' }
     ];
     
     stats.forEach(stat => {
@@ -248,7 +249,7 @@ export function renderProfile(containerId) {
     // Gráfico de distribuição de apostas por valor
     const chartSection = document.createElement('div');
     chartSection.style.cssText = 'margin-bottom:24px; background:rgba(15,17,22,0.6); border:1px solid #222; border-radius:8px; padding:16px;';
-    chartSection.innerHTML = `<h3 style="margin:0 0 16px 0;">📊 Distribuição de Apostas</h3>`;
+    chartSection.innerHTML = `<h3 style="margin:0 0 16px 0;"><i class=\"fa-solid fa-chart-pie\" aria-hidden=\"true\" style=\"margin-right:8px\"></i>Distribuição de Apostas</h3>`;
     
     // Agrupar apostas por range
     const ranges = { '< 10Kz': 0, '10-50Kz': 0, '50-100Kz': 0, '> 100Kz': 0 };
@@ -288,12 +289,12 @@ export function renderProfile(containerId) {
   
   const pendingCount = bets.filter(b => b.status === 'pending').length;
   listSection.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-    <h3 style="margin:0;">📋 Histórico de Apostas (${bets.length})</h3>
-    ${pendingCount > 0 ? `<button id="resolve-all-bets" class="btn signin-btn" style="padding:6px 12px; font-size:12px;">🎰 Resolver ${pendingCount} Apostas</button>` : ''}
+    <h3 style="margin:0;"><i class=\"fa-solid fa-clipboard-list\" aria-hidden=\"true\" style=\"margin-right:6px\"></i>Histórico de Apostas (${bets.length})</h3>
+    ${pendingCount > 0 ? `<button id="resolve-all-bets" class="btn signin-btn" style="padding:6px 12px; font-size:12px;"><i class=\"fa-solid fa-dice\" aria-hidden=\"true\" style=\"margin-right:6px\"></i>Resolver ${pendingCount} Apostas</button>` : ''}
   </div>`;
   
   if (bets.length === 0) {
-    listSection.innerHTML += '<p style="color:#aaa;">Nenhuma aposta registrada ainda. Comece a apostar! 🎯</p>';
+    listSection.innerHTML += '<p style="color:#aaa;">Nenhuma aposta registrada ainda. Comece a apostar! <i class="fa-solid fa-bullseye" aria-hidden="true"></i></p>';
   } else {
     const ul = document.createElement('ul');
     ul.style.cssText = 'list-style:none; padding:0; margin:0;';
@@ -304,7 +305,7 @@ export function renderProfile(containerId) {
       const ret = (b.stake * b.odd).toFixed(0);
       const statusColor = getBetStatusColor(b.status);
       const statusIcon = getBetStatusIcon(b.status);
-      const resolvedText = b.status !== 'pending' ? `Resultado: <strong style="color:${statusColor};">${statusIcon} ${b.result}</strong> — Ganho: <strong style="color:${statusColor};">${b.winnings}Kz</strong>` : `<button class="resolve-btn" data-idx="${originalIdx}" style="background:${statusColor}; color:#000; border:none; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:11px; font-weight:bold;">🎲 Resolver</button>`;
+      const resolvedText = b.status !== 'pending' ? `Resultado: <strong style="color:${statusColor};">${statusIcon} ${b.result}</strong> — Ganho: <strong style="color:${statusColor};">${b.winnings}Kz</strong>` : `<button class="resolve-btn" data-idx="${originalIdx}" style="background:${statusColor}; color:#000; border:none; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:11px; font-weight:bold;"><i class="fa-solid fa-dice" aria-hidden="true" style="margin-right:6px"></i>Resolver</button>`;
       
       li.style.cssText = 'padding:12px; margin-bottom:8px; border-left:4px solid ' + statusColor + '; background:rgba(255,255,255,0.02); border-radius:4px; color:#fff;';
       li.innerHTML = `
@@ -331,7 +332,7 @@ export function renderProfile(containerId) {
   // Handlers para resolver apostas
   document.getElementById('resolve-all-bets')?.addEventListener('click', () => {
     const result = resolveAllPendingBets(usuario);
-    showMessage(`🎲 ${result.resolved} aposta(s) resolvida(s)! Ganhos: +${result.totalWinnings}Kz`, 'success');
+    showMessage(`<i class="fa-solid fa-dice" aria-hidden="true" style="margin-right:6px"></i> ${result.resolved} aposta(s) resolvida(s)! Ganhos: +${result.totalWinnings}Kz`, 'success');
     renderProfile(containerId);
     updateUserInfo();
   });
@@ -343,8 +344,8 @@ export function renderProfile(containerId) {
       const bets = JSON.parse(localStorage.getItem('bets_' + usuario) || '[]');
       const bet = bets[betIdx];
       const msg = bet.status === 'won' 
-        ? `✅ Aposta Ganha! +${bet.winnings}Kz` 
-        : `❌ Aposta Perdida! -${bet.stake}Kz`;
+        ? `<i class="fa-solid fa-check-circle" aria-hidden="true" style="margin-right:6px;color:#0aff82"></i> Aposta Ganha! +${bet.winnings}Kz` 
+        : `<i class="fa-solid fa-times-circle" aria-hidden="true" style="margin-right:6px;color:#ff4444"></i> Aposta Perdida! -${bet.stake}Kz`;
       showMessage(msg, bet.status === 'won' ? 'success' : 'error');
       renderProfile(containerId);
       updateUserInfo();
