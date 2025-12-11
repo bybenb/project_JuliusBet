@@ -43,11 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const open = nav.classList.toggle('open');
       ham.setAttribute('aria-expanded', open ? 'true' : 'false');
       ham.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
-      // swap icon to xmark when open
+      // swap icon to xmark when open and update ham open class
       const icon = ham.querySelector('i');
-      if (icon) {
-        icon.className = open ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
-      }
+      if (icon) icon.className = open ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+      ham.classList.toggle('open', open);
     }
 
     ham.addEventListener('click', (e) => { e.stopPropagation(); toggleNav(); });
@@ -56,11 +55,19 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleNav(); }
     });
 
-    // close menu when clicking outside or on link
+    // close menu when clicking outside or on link — keep button state in sync
     document.addEventListener('click', (ev) => {
       if (!nav) return;
       if (!nav.classList.contains('open')) return;
-      if (!header.contains(ev.target)) nav.classList.remove('open');
+      if (!header.contains(ev.target)) {
+        nav.classList.remove('open');
+        // sync ham button state
+        ham.classList.remove('open');
+        ham.setAttribute('aria-expanded', 'false');
+        ham.setAttribute('aria-label', 'Abrir menu');
+        const icon = ham.querySelector('i');
+        if (icon) icon.className = 'fa-solid fa-bars';
+      }
     }, true);
 
     nav?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
