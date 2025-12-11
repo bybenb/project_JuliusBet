@@ -43,6 +43,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const open = nav.classList.toggle('open');
       ham.setAttribute('aria-expanded', open ? 'true' : 'false');
       ham.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+      // swap icon to xmark when open
+      const icon = ham.querySelector('i');
+      if (icon) {
+        icon.className = open ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+      }
     }
 
     ham.addEventListener('click', (e) => { e.stopPropagation(); toggleNav(); });

@@ -203,15 +203,21 @@ body {
 
     .nav {
         width: 100%;
-        display: none;
+        /* display:flex so we can animate max-height; hide content with max-height/opacity */
+        display: flex;
         flex-direction: column;
         gap: 8px;
         background: transparent;
         padding: 8px 0;
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: max-height 280ms ease, opacity 220ms ease;
     }
 
     .nav.open {
-        display: flex;
+        max-height: 650px; /* enough to fit menu items */
+        opacity: 1;
     }
 
     .nav a {
