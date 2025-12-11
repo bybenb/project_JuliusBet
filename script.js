@@ -164,7 +164,7 @@ function updateUserInfo() {
       if (usuario) {
         const saldo = getSaldo(usuario) ?? 0;
         const bets = JSON.parse(localStorage.getItem('bets_' + usuario) || '[]');
-        ui.innerHTML = `Olá, <strong style="color:var(--cor-verde)">${usuario}</strong> — Saldo: <strong style="color:var(--cor-verde)">${saldo}</strong> — <a href="perfil.html">Minha Conta</a> | <a href="#" id="logout-btn-script-ui">Sair</a> | <a href="perfil.html#histórico" id="ver-apostas">Minhas Apostas (${bets.length})</a>`;
+        ui.innerHTML = `Olá, <strong style="color:var(--cor-verde)">${usuario}</strong> — Saldo: <strong style="color:var(--cor-verde)">${saldo}</strong> — <a href="perfil.html">Minha Conta</a> | <a href="#" id="logout-btn-script-ui">Sair</a> | <a href="perfil.html#historico" id="vver-apostas">Minhas Apostas (${bets.length})</a>`;
         const btn = document.getElementById('ver-apostas');
         if (btn) btn.addEventListener('click', (e) => {
           e.preventDefault();
