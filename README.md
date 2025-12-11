@@ -1,10 +1,35 @@
 # JuliusBet (Demo)
 
-Pequeno projeto didático de interface para apostas (front-end somente).
+Pequeno projeto didático de interface para apostas (front-end somente). Detém implementação puramente front-end (HTML/CSS/JS). Os Dados de usuário e saldo são mantidos no `localStorage` para demonstração.
 
-Resumo
-- Implementação puramente front-end (HTML/CSS/JS). Dados de usuário e saldo são mantidos no `localStorage` para demonstração.
-- Não é um sistema de apostas real — apenas demonstrações de UI/UX e lógica cliente-side.
++ Veja o nosso projecto [Aqui](https://bybenb.github.io/project_JuliusBet)
+
+`Nota:`  Não é um sistema de apostas real — apenas demonstrações de UI/UX e lógica cliente-side.
+
+
+
+
+##  Equipa & Créditos
+
+
+- **Beny Reis** - [@bkapa8](https://www.instagram.com/bkapa8/)
+
+- **Nazaré Sant'Ana** - [@iamnaza1](https://www.instagram.com/iamnaza1/)
+- **Júlio Peliganga** - [@juliopelinganga](https://www.instagram.com/juliopelinganga/)
+- **Jolinda Cabando**
+- **Etelvina Simião** - [@taysimiao](https://www.instagram.com/taysimiao/)
+- **Ed Cremilda** - [@edsureny](https://www.instagram.com/edsurenycremilda/)
+- **Aldo Bruno** - [@aldo.dasilva](https://www.facebook.com/aldo.dasilva.7146/)
+
+- **Hernani Machado** - [@bengazai](https://www.instagram.com/bengazai/)
+
+---
+- [MHRAP](https://www.youtube.com/@MHRAPOFICIAL) - *suas [músicas](https://www.youtube.com/watch?v=uCyVx1vYDz8&list=RDuCyVx1vYDz8&start_radio=1&pp=ygUTbWhyYXAgbXVuZG8gdmlydHVhbKAHAQ%3D%3D) foram ouvidas na inspiração e ârea de trablho*
+---
+
+
+
+## Parte Técnica (blablabla)
 
 Principais recursos
 - Listagem de partidas com odds e interface de aposta (modal).
@@ -28,6 +53,3 @@ Melhorias aplicadas (rápidas)
 
 Como contribuir
 - Faça fork, crie uma branch, aplique melhorias e abra um PR.
-
-Licença
-- Código aberto para uso didático.
