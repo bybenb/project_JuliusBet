@@ -30,13 +30,39 @@
           <div class="match-title">Slot Demo</div>
           <p>Jogo de demonstração com recompensas fictícias.</p>
         </div>
+        <div class="match-card" id="aviator-card">
+          <div class="match-title">Aviator (Demo)</div>
+          <div class="aviator">
+            <div class="aviator-top" style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="color:#aaa;font-size:13px">Multiplicador</div>
+                <div class="multiplier" id="aviator-mult">1.00x</div>
+              </div>
+              <div style="text-align:right">
+                <div style="color:#aaa;font-size:13px">Saldo</div>
+                <div id="aviator-saldo" style="font-weight:bold;color:var(--cor-verde)">0</div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+              <input id="aviator-stake" type="number" min="1" value="10" style="padding:8px;border-radius:6px;border:1px solid #222;background:#0d0f16;color:#fff;width:120px;" />
+              <button id="aviator-place" class="btn signin-btn">Colocar Aposta</button>
+              <button id="aviator-start" class="btn login-btn">Iniciar</button>
+              <button id="aviator-cashout" class="btn signin-btn" disabled>Cashout</button>
+            </div>
+
+            <div style="margin-top:10px;color:#aaa;font-size:13px">
+              <small id="aviator-status">Aguardando aposta...</small>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
 
     <div class="dono">by benb / <a href="http://www.instagram.com/bkapa8" target="_blank">ProgGennin</a></div>
 
     <footer class="footer">JuliusBet © 2025</footer>
-
     <script src="script.js"></script>
+    <script type="module" src="games/aviator.js"></script>
   </body>
 </html>
