@@ -161,15 +161,18 @@ function updateUserInfo() {
   const usuario = getUsuarioLogado();
   const ui = document.getElementById('user-info');
   if (ui) {
-    if (usuario) {
-      const saldo = getSaldo(usuario) ?? 0;
-      const bets = JSON.parse(localStorage.getItem('bets_' + usuario) || '[]');
-      ui.innerHTML = `Olá, <strong style="color:var(--cor-verde)">${usuario}</strong> — Saldo: <strong style="color:var(--cor-verde)">${saldo}</strong> — <a href="conta.html">Minha Conta</a> | <a href="javascript:logout()">Sair</a> | <a href="#" id="ver-apostas">Minhas Apostas (${bets.length})</a>`;
-      const btn = document.getElementById('ver-apostas');
-      if (btn) btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        alert(JSON.stringify(bets, null, 2));
-      });
+      if (usuario) {
+        const saldo = getSaldo(usuario) ?? 0;
+        const bets = JSON.parse(localStorage.getItem('bets_' + usuario) || '[]');
+        ui.innerHTML = `Olá, <strong style="color:var(--cor-verde)">${usuario}</strong> — Saldo: <strong style="color:var(--cor-verde)">${saldo}</strong> — <a href="conta.html">Minha Conta</a> | <a href="#" id="logout-btn-script-ui">Sair</a> | <a href="#" id="ver-apostas">Minhas Apostas (${bets.length})</a>`;
+        const btn = document.getElementById('ver-apostas');
+        if (btn) btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          alert(JSON.stringify(bets, null, 2));
+        });
+        // attach logout for in-page ui
+        const lnk = document.getElementById('logout-btn-script-ui');
+        if (lnk) lnk.addEventListener('click', (e) => { e.preventDefault(); logout(); });
     } else {
       ui.innerHTML = '<a href="conta.html#login" class="btn login-btn">Entrar</a> <a href="conta.html#register" class="btn signin-btn">Registrar</a>';
     }
@@ -260,9 +263,21 @@ window.addEventListener('load', function() {
   const usuarioLogado = getUsuarioLogado();
   if (usuarioLogado) {
     const auth = document.querySelector('.auth');
-    if (auth) {
-      auth.innerHTML = `<span style="color: #0aff82; margin-right: 15px;">Olá, ${usuarioLogado}!</span><a href="javascript:logout();" class="btn login-btn">Sair</a>`;
-    }
+        if (auth) {
+          auth.innerHTML = '';
+          const span = document.createElement('span');
+          span.style.color = '#0aff82';
+          span.style.marginRight = '15px';
+          span.textContent = `Olá, ${usuarioLogado}!`;
+          const a = document.createElement('a');
+          a.href = '#';
+          a.className = 'btn login-btn';
+          a.id = 'logout-btn-script';
+          a.textContent = 'Sair';
+          a.addEventListener('click', (e) => { e.preventDefault(); logout(); });
+          auth.appendChild(span);
+          auth.appendChild(a);
+        }
   }
 
   // proteger páginas restritas

@@ -101,7 +101,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const usuarioLogado = getUsuarioLogado();
   if (usuarioLogado) {
     const auth = document.querySelector('.auth');
-    if (auth) auth.innerHTML = `<span style="color: #0aff82; margin-right: 15px;">Olá, ${usuarioLogado}!</span><a href="javascript:logout();" class="btn login-btn">Sair</a>`;
+    if (auth) {
+      auth.innerHTML = '';
+      const span = document.createElement('span');
+      span.style.color = '#0aff82';
+      span.style.marginRight = '15px';
+      span.textContent = `Olá, ${usuarioLogado}!`;
+      const a = document.createElement('a');
+      a.href = '#';
+      a.className = 'btn login-btn';
+      a.id = 'logout-btn-main';
+      a.textContent = 'Sair';
+      a.addEventListener('click', (e) => { e.preventDefault(); logout(); });
+      auth.appendChild(span);
+      auth.appendChild(a);
+    }
     // injetar links restritos na nav
     const nav = document.querySelector('.nav');
     if (nav && !nav.querySelector('.restricted-links')) {

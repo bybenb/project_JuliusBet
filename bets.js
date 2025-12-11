@@ -85,9 +85,12 @@ export function updateUserInfo() {
     if (usuario) {
       const saldo = getSaldo(usuario) ?? 0;
       const bets = JSON.parse(localStorage.getItem('bets_' + usuario) || '[]');
-      ui.innerHTML = `Olá, <strong style="color:var(--cor-verde)">${usuario}</strong> — Saldo: <strong style="color:var(--cor-verde)">${saldo}</strong> — <a href="conta.html">Minha Conta</a> | <a href="javascript:logout()">Sair</a> | <a href="#" id="ver-apostas">Minhas Apostas (${bets.length})</a>`;
+      ui.innerHTML = `Olá, <strong style="color:var(--cor-verde)">${usuario}</strong> — Saldo: <strong style="color:var(--cor-verde)">${saldo}</strong> — <a href="conta.html">Minha Conta</a> | <a href="#" id="logout-btn-ui">Sair</a> | <a href="#" id="ver-apostas">Minhas Apostas (${bets.length})</a>`;
       const btn = document.getElementById('ver-apostas');
       if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); alert(JSON.stringify(bets, null, 2)); });
+      // attach logout handler for the ui logout link
+      const lnk = document.getElementById('logout-btn-ui');
+      if (lnk) lnk.addEventListener('click', (e) => { e.preventDefault(); logout(); });
     } else {
       ui.innerHTML = '<a href="conta.html#login" class="btn login-btn">Entrar</a> <a href="conta.html#register" class="btn signin-btn">Registrar</a>';
     }
